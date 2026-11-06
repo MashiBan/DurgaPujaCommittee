@@ -55,6 +55,12 @@ const deduplicateOrganisers = (items: Organiser[]): Organiser[] => {
   return [...unique.values()];
 };
 
+const mergeGalleryPhotos = (...groups: GalleryPhoto[][]): GalleryPhoto[] => {
+  const photosById = new Map<string, GalleryPhoto>();
+  groups.flat().forEach((photo) => photosById.set(photo.id, photo));
+  return [...photosById.values()];
+};
+
 export default function App() {
   // Festival Tabs State: 'durga' | 'laxmi' | 'kali' | 'saraswati' | 'noboborsho'
   const [activeFestival, setActiveFestival] = useState<FestivalId>('durga');
@@ -146,7 +152,9 @@ export default function App() {
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>(() => {
     try {
       const saved = localStorage.getItem('agamani_gallery');
-      return saved ? JSON.parse(saved) : initialGalleryPhotos;
+      return saved
+        ? mergeGalleryPhotos(initialGalleryPhotos, JSON.parse(saved) as GalleryPhoto[])
+        : initialGalleryPhotos;
     } catch {
       return initialGalleryPhotos;
     }
@@ -304,9 +312,7 @@ export default function App() {
   // Sync real-time data from Firestore
   useEffect(() => {
     const unsubGallery = subscribeGallery((photos) => {
-      if (photos && photos.length > 0) {
-        setGalleryPhotos(photos);
-      }
+      setGalleryPhotos(mergeGalleryPhotos(initialGalleryPhotos, photos));
     });
 
     const unsubPandal = subscribePandalInfo((info) => {
