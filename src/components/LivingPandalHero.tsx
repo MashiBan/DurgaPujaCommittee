@@ -386,7 +386,9 @@ export const LivingPandalHero: React.FC<LivingPandalHeroProps> = ({
 
         {sunVisible && (
           <div
-            className="absolute z-[3] -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-1000"
+            className={`absolute z-[3] -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all ${
+              isLiveClock ? 'duration-1000' : 'duration-75'
+            }`}
             style={{
               left: `${sunLeft}%`,
               top: `${sunTop}%`,
@@ -403,7 +405,9 @@ export const LivingPandalHero: React.FC<LivingPandalHeroProps> = ({
 
         {moonVisible && (
           <div
-            className="absolute z-[3] -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-1000"
+            className={`absolute z-[3] -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all ${
+              isLiveClock ? 'duration-1000' : 'duration-75'
+            }`}
             style={{
               left: `${moonLeft}%`,
               top: `${moonTop}%`,
@@ -685,7 +689,7 @@ export const LivingPandalHero: React.FC<LivingPandalHeroProps> = ({
 
       {/* Compact time control stays at the bottom of the hero. */}
       <div
-        className="absolute bottom-3 sm:bottom-5 inset-x-2 sm:inset-x-6 z-40 mx-auto w-auto max-w-[760px] px-2 sm:px-6 py-0.5 rounded-full bg-white/90 sm:bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_4px_14px_rgba(0,0,0,0.12)]"
+        className="absolute bottom-3 sm:bottom-5 inset-x-2 sm:inset-x-6 z-40 mx-auto w-auto max-w-[760px] px-2 sm:px-6 py-1.5 sm:py-2 rounded-2xl bg-white/90 sm:bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_4px_14px_rgba(0,0,0,0.12)]"
       >
         <div className="mx-auto flex w-full flex-nowrap items-center justify-between gap-1 sm:gap-3">
 
@@ -748,6 +752,45 @@ export const LivingPandalHero: React.FC<LivingPandalHeroProps> = ({
             ))}
           </div>
 
+        </div>
+
+        <div className="mt-2 flex items-center gap-2 sm:gap-3 px-1">
+          <Sun className="h-3.5 w-3.5 shrink-0 text-amber-500" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <label htmlFor="pandal-time-slider" className="sr-only">
+              {language === 'bn'
+                ? 'সূর্য ও চাঁদের চলাচল দেখতে সময় সরান'
+                : language === 'hi'
+                ? 'सूर्य और चंद्रमा की चाल देखने के लिए समय बदलें'
+                : 'Scrub time to see the sun and moon move'}
+            </label>
+            <input
+              id="pandal-time-slider"
+              type="range"
+              min="0"
+              max="24"
+              step="0.05"
+              value={hour}
+              onChange={(event) => {
+                setIsLiveClock(false);
+                setHour(Number(event.target.value));
+              }}
+              aria-valuetext={formatTime(hour)}
+              className="h-1.5 w-full cursor-pointer appearance-none rounded-full accent-[#8B0000]"
+              style={{
+                background:
+                  'linear-gradient(90deg, #0f172a 0%, #fb923c 25%, #fef08a 50%, #fb923c 75%, #0f172a 100%)',
+              }}
+            />
+            <div className="mt-0.5 flex justify-between text-[8px] sm:text-[9px] font-medium text-stone-500">
+              <span>12 AM</span>
+              <span>6 AM</span>
+              <span>12 PM</span>
+              <span>6 PM</span>
+              <span>12 AM</span>
+            </div>
+          </div>
+          <MoonStar className="h-3.5 w-3.5 shrink-0 text-indigo-900" aria-hidden="true" />
         </div>
       </div>
     </section>
