@@ -137,14 +137,17 @@ export const deleteOrganiserFromDb = async (
   organiser: Pick<Organiser, 'id' | 'documentId'>
 ): Promise<void> => {
   try {
+    if (organiser.documentId) {
+      await deleteDoc(doc(db, 'organisers', organiser.documentId));
+      return;
+    }
+
     const snapshot = await getDocs(collection(db, 'organisers'));
     const matchingDocs = snapshot.docs.filter((organiserDoc) => {
       const data = organiserDoc.data();
       return (
         organiserDoc.id === organiser.id ||
-        organiserDoc.id === organiser.documentId ||
-        data.id === organiser.id ||
-        data.id === organiser.documentId
+        data.id === organiser.id
       );
     });
 

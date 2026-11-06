@@ -40,6 +40,21 @@ import { StickySpotifyPlayer } from './components/StickySpotifyPlayer';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 
+const deduplicateOrganisers = (items: Organiser[]): Organiser[] => {
+  const unique = new Map<string, Organiser>();
+  items.forEach((organiser) => {
+    const key = organiser.nameEnglish.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+    if (!key) {
+      unique.set(`id:${organiser.id}`, organiser);
+      return;
+    }
+
+    const existing = unique.get(key);
+    if (!existing || (!existing.photoUrl && organiser.photoUrl)) unique.set(key, organiser);
+  });
+  return [...unique.values()];
+};
+
 export default function App() {
   // Festival Tabs State: 'durga' | 'laxmi' | 'kali' | 'saraswati' | 'noboborsho'
   const [activeFestival, setActiveFestival] = useState<FestivalId>('durga');
@@ -202,7 +217,7 @@ export default function App() {
       }
 
       const savedOrganisers = JSON.parse(saved) as Organiser[];
-      return savedOrganisers.map((organiser) => {
+      const normalizedOrganisers = savedOrganisers.map((organiser) => {
         const defaults = initialOrganisers.find((initialOrganiser) => initialOrganiser.id === organiser.id);
         return defaults
           ? { ...defaults, ...organiser, contact: organiser.contact || defaults.contact }
@@ -211,6 +226,7 @@ export default function App() {
         !deletedIds.has(organiser.id) &&
         !(organiser.documentId && deletedIds.has(organiser.documentId))
       );
+      return deduplicateOrganisers(normalizedOrganisers);
     } catch {
       return initialOrganisers.filter((organiser) => !deletedOrganiserIdsRef.current.has(organiser.id));
     }
@@ -302,33 +318,35 @@ export default function App() {
     const unsubOrganisers = subscribeOrganisers((remoteOrganisers, fromCache) => {
       if (fromCache && remoteOrganisers.length === 0) return;
 
+      const getNameKey = (organiser: Organiser) =>
+        (organiser.nameEnglish || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
       const isDeleted = (organiser: Organiser) =>
         deletedOrganiserIdsRef.current.has(organiser.id) ||
         (!!organiser.documentId && deletedOrganiserIdsRef.current.has(organiser.documentId));
-      const localOrganisers = organisersRef.current.filter((organiser) => !isDeleted(organiser));
-      const activeRemoteOrganisers = remoteOrganisers.filter((organiser) => !isDeleted(organiser));
-      const remoteById = new Map(activeRemoteOrganisers.map((organiser) => [organiser.id, organiser]));
-      const mergedOrganisers = activeRemoteOrganisers.map((remoteOrganiser) => {
-        const localOrganiser = localOrganisers.find((organiser) => organiser.id === remoteOrganiser.id);
-        if (!localOrganiser || remoteOrganiser.photoUrl || !localOrganiser.photoUrl) return remoteOrganiser;
-        const mergedOrganiser = { ...localOrganiser, ...remoteOrganiser, photoUrl: localOrganiser.photoUrl };
-        void saveOrganiserToDb(mergedOrganiser).catch((error) =>
-          console.error('Firestore organiser photo migration failed:', error)
-        );
-        return mergedOrganiser;
-      });
+      const remoteByName = new Map<string, Organiser>();
+      remoteOrganisers.filter((organiser) => !isDeleted(organiser)).forEach((organiser) => {
+        const key = getNameKey(organiser) || `id:${organiser.id}`;
+        const existing = remoteByName.get(key);
+        if (!existing) {
+          remoteByName.set(key, organiser);
+          return;
+        }
 
-      const localOnlyOrganisers = localOrganisers.filter((organiser) => !remoteById.has(organiser.id));
-      localOnlyOrganisers.forEach((organiser) => {
-        void saveOrganiserToDb(organiser).catch((error) =>
-          console.error('Firestore organiser migration failed:', error)
-        );
+        const duplicate = existing.photoUrl ? organiser : existing;
+        const keep = existing.photoUrl ? existing : organiser;
+        remoteByName.set(key, keep);
+        if (!fromCache) {
+          void deleteOrganiserFromDb(duplicate).catch((error) =>
+            console.error('Duplicate Firestore organiser delete failed:', error)
+          );
+        }
       });
-
-      const merged = [...mergedOrganisers, ...localOnlyOrganisers];
-      organisersRef.current = merged;
-      setOrganisers(merged);
-      safeSetItem('agamani_organisers', JSON.stringify(merged));
+      const activeRemoteOrganisers = [...remoteByName.values()];
+      // Firestore is the source of truth after its snapshot arrives. Do not
+      // migrate stale local-only entries back into the collection on refresh.
+      organisersRef.current = activeRemoteOrganisers;
+      setOrganisers(activeRemoteOrganisers);
+      safeSetItem('agamani_organisers', JSON.stringify(activeRemoteOrganisers));
     });
 
     return () => {
