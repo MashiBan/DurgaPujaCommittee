@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { PandalInfo, Language } from '../types';
 import { translations } from '../data/initialData';
-import { MapPin, Phone, Mail, Eye, Users, X, Send, CheckCircle2, Sparkles, ExternalLink, Github } from 'lucide-react';
+import { MapPin, Phone, Mail, X, Send, CheckCircle2, Sparkles, ExternalLink, Github } from 'lucide-react';
 import { submitContactInquiry, dispatchEmailViaEmailJs } from '../services/firestoreService';
 
 interface PandalFooterProps {
@@ -147,38 +147,6 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
                 SHREE SHREE DURGA PUJA {info.year}
               </span>
             </div>
-          </div>
-
-        </div>
-
-        {/* Analytics */}
-        <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-[#292524] grid grid-cols-1 sm:grid-cols-2 items-center gap-4 sm:gap-6">
-
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#292524] flex items-center justify-center shrink-0">
-              <Eye className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#F59E0B]" />
-            </div>
-
-            <div>
-              <a
-                href="https://analytics.google.com/analytics/web/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-widest text-[#F59E0B] hover:text-amber-300 font-mono block leading-tight"
-              >
-                VISITS &amp; VISITOR COUNTRIES · GOOGLE ANALYTICS
-              </a>
-              <span className="text-xs text-[#A8A29E] leading-relaxed">
-                View total page views and visitor countries, including India.
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 sm:gap-3 text-[10px] sm:text-[11px] text-[#78716C] font-mono tracking-wide sm:justify-self-start">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
-              <Users className="w-3.5 h-3.5 text-[#B91C1C]" />
-            </div>
-            <span>THANK YOU FOR BEING HERE</span>
           </div>
 
         </div>
