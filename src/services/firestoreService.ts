@@ -175,6 +175,13 @@ export interface EmailJsConfig {
   targetEmail: string; // default nonchalantlycool0@gmail.com
 }
 
+export const DEFAULT_EMAILJS_CONFIG: EmailJsConfig = {
+  serviceId: 'service_j1e9w99',
+  templateId: 'template_kxnhawq',
+  publicKey: 'VHrDPXvaAIOA7k7zo',
+  targetEmail: 'nonchalantlycool0@gmail.com',
+};
+
 export const subscribeInquiries = (
   callback: (inquiries: ContactInquiry[]) => void
 ) => {
@@ -204,7 +211,7 @@ export const submitContactInquiry = async (inquiry: ContactInquiry): Promise<voi
       status: 'new',
     });
   } catch (error) {
-    console.warn('Inquiry Firestore save note:', error);
+    handleFirestoreError(error, OperationType.CREATE, docPath);
   }
 };
 
@@ -217,21 +224,33 @@ export const deleteInquiryFromDb = async (inquiryId: string): Promise<void> => {
 };
 
 export const getEmailJsConfig = async (): Promise<EmailJsConfig | null> => {
+  let savedConfig: Partial<EmailJsConfig> | null = null;
   try {
     const snap = await getDoc(doc(db, 'settings', 'emailjs'));
     if (snap.exists()) {
-      return snap.data() as EmailJsConfig;
+      savedConfig = snap.data() as Partial<EmailJsConfig>;
     }
-
-    const cachedConfig = localStorage.getItem('agamani_emailjs_config');
-    if (cachedConfig) {
-      return JSON.parse(cachedConfig) as EmailJsConfig;
-    }
-    return null;
   } catch (err) {
-    console.warn('Get EmailJS config note:', err);
-    return null;
+    console.warn('Could not load EmailJS settings from Firestore; checking local settings:', err);
   }
+
+  if (!savedConfig) {
+    try {
+      const cachedConfig = localStorage.getItem('agamani_emailjs_config');
+      if (cachedConfig) savedConfig = JSON.parse(cachedConfig) as Partial<EmailJsConfig>;
+    } catch (err) {
+      console.warn('Could not parse local EmailJS settings:', err);
+    }
+  }
+
+  return {
+    ...DEFAULT_EMAILJS_CONFIG,
+    ...savedConfig,
+    serviceId: savedConfig?.serviceId?.trim() || DEFAULT_EMAILJS_CONFIG.serviceId,
+    templateId: savedConfig?.templateId?.trim() || DEFAULT_EMAILJS_CONFIG.templateId,
+    publicKey: savedConfig?.publicKey?.trim() || DEFAULT_EMAILJS_CONFIG.publicKey,
+    targetEmail: savedConfig?.targetEmail?.trim() || DEFAULT_EMAILJS_CONFIG.targetEmail,
+  };
 };
 
 export const saveEmailJsConfig = async (config: EmailJsConfig): Promise<void> => {
@@ -239,8 +258,8 @@ export const saveEmailJsConfig = async (config: EmailJsConfig): Promise<void> =>
     await setDoc(doc(db, 'settings', 'emailjs'), config);
     localStorage.setItem('agamani_emailjs_config', JSON.stringify(config));
   } catch (err) {
-    console.warn('Save EmailJS config note:', err);
     localStorage.setItem('agamani_emailjs_config', JSON.stringify(config));
+    throw err;
   }
 };
 

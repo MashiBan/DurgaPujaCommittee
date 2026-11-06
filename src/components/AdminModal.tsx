@@ -16,6 +16,7 @@ import {
   getEmailJsConfig,
   saveEmailJsConfig,
   dispatchEmailViaEmailJs,
+  DEFAULT_EMAILJS_CONFIG,
   type ContactInquiry,
   type EmailJsConfig,
 } from '../services/firestoreService';
@@ -186,12 +187,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   // Inquiries State & EmailJS Config
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
   const [inquirySearch, setInquirySearch] = useState('');
-  const [emailJsConfig, setEmailJsConfig] = useState<EmailJsConfig>({
-    serviceId: '',
-    templateId: '',
-    publicKey: '',
-    targetEmail: AUTHORIZED_ADMIN_EMAIL,
-  });
+  const [emailJsConfig, setEmailJsConfig] = useState<EmailJsConfig>(DEFAULT_EMAILJS_CONFIG);
   const [emailJsStatusMsg, setEmailJsStatusMsg] = useState('');
   const [isSendingTestMail, setIsSendingTestMail] = useState(false);
 

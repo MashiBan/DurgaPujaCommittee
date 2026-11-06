@@ -22,6 +22,7 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
   const [contactMessage, setContactMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const [submittedInquiry, setSubmittedInquiry] = useState<{
     subject: string;
@@ -35,6 +36,7 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
     if (!contactName.trim() || !contactEmail.trim() || !contactMessage.trim()) return;
 
     setIsSubmitting(true);
+    setSubmitError('');
     const inq = {
       id: `inq-${Date.now()}`,
       name: contactName.trim(),
@@ -59,15 +61,9 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
         reason: dispatchRes.reason,
       });
       setIsSubmitted(true);
-    } catch (err: any) {
-      console.warn('Contact submit note:', err);
-      setSubmittedInquiry({
-        subject: inq.subject,
-        message: inq.message,
-        dispatched: false,
-        reason: err?.message,
-      });
-      setIsSubmitted(true);
+    } catch (err) {
+      console.error('Contact inquiry submission failed:', err);
+      setSubmitError('We could not save your message. Please use the direct email link below or try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -252,19 +248,19 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
                     Thank You / ধন্যবাদ!
                   </h4>
                   <p className="text-xs text-[#57534E] max-w-sm mx-auto font-sans leading-relaxed mt-1">
-                    Your message has been safely recorded in the committee&apos;s live database.
+                    {submittedInquiry?.dispatched
+                      ? 'Your message was recorded and emailed to the committee.'
+                      : 'Your message was recorded in the committee’s database, but the automatic email could not be sent.'}
                   </p>
                   {submittedInquiry?.dispatched ? (
                     <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-medium border border-emerald-300">
                       <span>✓ Dispatched to nonchalantlycool0@gmail.com</span>
                     </div>
-                  ) : (
-                    submittedInquiry?.reason && (
-                      <p className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded border border-amber-200 mt-2 text-left">
-                        {submittedInquiry.reason}
-                      </p>
-                    )
-                  )}
+                  ) : submittedInquiry?.reason ? (
+                    <p className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded border border-amber-200 mt-2 text-left">
+                      {submittedInquiry.reason}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="p-3 rounded-lg bg-stone-100 border border-stone-200 text-left text-xs space-y-1">
@@ -298,6 +294,7 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
                       setContactPhone('');
                       setContactMessage('');
                       setSubmittedInquiry(null);
+                      setSubmitError('');
                     }}
                     className="px-5 py-2 bg-[#991B1B] hover:bg-[#7F1D1D] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
                   >
@@ -307,6 +304,21 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
               </div>
             ) : (
               <form onSubmit={handleContactSubmit} className="p-6 space-y-4">
+                {submitError && (
+                  <div role="alert" className="text-xs text-rose-800 bg-rose-50 p-3 rounded border border-rose-200">
+                    <p>{submitError}</p>
+                    <a
+                      href={`mailto:nonchalantlycool0@gmail.com?subject=${encodeURIComponent(
+                        `[Agamani Durga Puja] ${contactSubject}`
+                      )}&body=${encodeURIComponent(
+                        `Name: ${contactName}\nEmail: ${contactEmail}\nPhone: ${contactPhone}\n\nMessage:\n${contactMessage}`
+                      )}`}
+                      className="inline-flex items-center gap-1 mt-2 font-semibold underline"
+                    >
+                      Open email app
+                    </a>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold uppercase text-[#44403C] mb-1 font-mono">
