@@ -182,11 +182,24 @@ export default function App() {
     safeSetItem('agamani_stories', JSON.stringify(updatedStories));
   };
 
+  const deletedOrganiserIdsRef = useRef<Set<string>>(
+    (() => {
+      try {
+        return new Set<string>(JSON.parse(localStorage.getItem('agamani_deleted_organisers') || '[]'));
+      } catch {
+        return new Set<string>();
+      }
+    })()
+  );
+
   // Organisers State
   const [organisers, setOrganisers] = useState<Organiser[]>(() => {
     try {
       const saved = localStorage.getItem('agamani_organisers');
-      if (!saved) return initialOrganisers;
+      const deletedIds = deletedOrganiserIdsRef.current;
+      if (!saved) {
+        return initialOrganisers.filter((organiser) => !deletedIds.has(organiser.id));
+      }
 
       const savedOrganisers = JSON.parse(saved) as Organiser[];
       return savedOrganisers.map((organiser) => {
@@ -194,9 +207,12 @@ export default function App() {
         return defaults
           ? { ...defaults, ...organiser, contact: organiser.contact || defaults.contact }
           : organiser;
-      });
+      }).filter((organiser) =>
+        !deletedIds.has(organiser.id) &&
+        !(organiser.documentId && deletedIds.has(organiser.documentId))
+      );
     } catch {
-      return initialOrganisers;
+      return initialOrganisers.filter((organiser) => !deletedOrganiserIdsRef.current.has(organiser.id));
     }
   });
   const organisersRef = useRef(organisers);
@@ -206,11 +222,28 @@ export default function App() {
     const previousIds = new Set(organisersRef.current.map((organiser) => organiser.id));
     const removedOrganisers = organisersRef.current.filter((organiser) => !updatedIds.has(organiser.id));
     const addedOrganisers = updatedOrganisers.filter((organiser) => !previousIds.has(organiser.id));
+    const tombstones = new Set(deletedOrganiserIdsRef.current);
+    removedOrganisers.forEach((organiser) => {
+      tombstones.add(organiser.id);
+      if (organiser.documentId) tombstones.add(organiser.documentId);
+    });
+    deletedOrganiserIdsRef.current = tombstones;
+    safeSetItem('agamani_deleted_organisers', JSON.stringify([...tombstones]));
 
-    await Promise.all([
-      ...removedOrganisers.map((organiser) => deleteOrganiserFromDb(organiser.id)),
-      ...addedOrganisers.map((organiser) => saveOrganiserToDb(organiser)),
-    ]);
+    try {
+      await Promise.all([
+        ...removedOrganisers.map((organiser) => deleteOrganiserFromDb(organiser)),
+        ...addedOrganisers.map((organiser) => saveOrganiserToDb(organiser)),
+      ]);
+    } catch (error) {
+      deletedOrganiserIdsRef.current = new Set(
+        [...tombstones].filter((id) => !removedOrganisers.some((organiser) =>
+          id === organiser.id || id === organiser.documentId
+        ))
+      );
+      safeSetItem('agamani_deleted_organisers', JSON.stringify([...deletedOrganiserIdsRef.current]));
+      throw error;
+    }
 
     organisersRef.current = updatedOrganisers;
     setOrganisers(updatedOrganisers);
@@ -239,12 +272,14 @@ export default function App() {
     localStorage.removeItem('agamani_social_posts');
     localStorage.removeItem('agamani_stories');
     localStorage.removeItem('agamani_organisers');
+    localStorage.removeItem('agamani_deleted_organisers');
     localStorage.removeItem('agamani_info');
 
     setScheduleDays(initialScheduleDays);
     setGalleryPhotos(initialGalleryPhotos);
     setSocialPosts(initialSocialPosts);
     setStories(initialStories);
+    deletedOrganiserIdsRef.current = new Set();
     organisersRef.current = initialOrganisers;
     setOrganisers(initialOrganisers);
     setPandalInfo(initialPandalInfo);
@@ -267,9 +302,13 @@ export default function App() {
     const unsubOrganisers = subscribeOrganisers((remoteOrganisers, fromCache) => {
       if (fromCache && remoteOrganisers.length === 0) return;
 
-      const localOrganisers = organisersRef.current;
-      const remoteById = new Map(remoteOrganisers.map((organiser) => [organiser.id, organiser]));
-      const mergedOrganisers = remoteOrganisers.map((remoteOrganiser) => {
+      const isDeleted = (organiser: Organiser) =>
+        deletedOrganiserIdsRef.current.has(organiser.id) ||
+        (!!organiser.documentId && deletedOrganiserIdsRef.current.has(organiser.documentId));
+      const localOrganisers = organisersRef.current.filter((organiser) => !isDeleted(organiser));
+      const activeRemoteOrganisers = remoteOrganisers.filter((organiser) => !isDeleted(organiser));
+      const remoteById = new Map(activeRemoteOrganisers.map((organiser) => [organiser.id, organiser]));
+      const mergedOrganisers = activeRemoteOrganisers.map((remoteOrganiser) => {
         const localOrganiser = localOrganisers.find((organiser) => organiser.id === remoteOrganiser.id);
         if (!localOrganiser || remoteOrganiser.photoUrl || !localOrganiser.photoUrl) return remoteOrganiser;
         const mergedOrganiser = { ...localOrganiser, ...remoteOrganiser, photoUrl: localOrganiser.photoUrl };

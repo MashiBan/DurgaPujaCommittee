@@ -70,6 +70,7 @@ export interface SocialPost {
 
 export interface Organiser {
   id: string;
+  documentId?: string;
   nameBengali: string;
   nameEnglish: string;
   nameHindi: string;

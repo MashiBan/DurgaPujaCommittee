@@ -3,6 +3,7 @@ import {
   doc,
   setDoc,
   getDoc,
+  getDocs,
   deleteDoc,
   onSnapshot,
 } from 'firebase/firestore';
@@ -92,7 +93,8 @@ export const savePandalInfoToDb = async (info: PandalInfo): Promise<void> => {
 const organiserFromFirestore = (documentId: string, data: Record<string, unknown>): Organiser =>
   ({
     ...data,
-    id: documentId,
+    id: (typeof data.id === 'string' && data.id) || documentId,
+    documentId,
     nameEnglish: (data.nameEnglish || data.name || '') as string,
     roleEnglish: (data.roleEnglish || data.role || '') as string,
     bioEnglish: (data.bioEnglish || data.bio || '') as string,
@@ -115,7 +117,7 @@ export const subscribeOrganisers = (callback: (organisers: Organiser[], fromCach
   );
 
 export const saveOrganiserToDb = async (organiser: Organiser): Promise<void> => {
-  const { photoUrl, ...organiserFields } = organiser;
+  const { photoUrl, documentId, ...organiserFields } = organiser;
   const firestoreOrganiser = {
     ...organiserFields,
     name: organiser.nameEnglish,
@@ -123,18 +125,32 @@ export const saveOrganiserToDb = async (organiser: Organiser): Promise<void> => 
     bio: organiser.bioEnglish,
     photo: photoUrl,
   };
+  const firestoreId = documentId || organiser.id;
   try {
-    await setDoc(doc(db, 'organisers', organiser.id), firestoreOrganiser);
+    await setDoc(doc(db, 'organisers', firestoreId), firestoreOrganiser);
   } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, `organisers/${organiser.id}`);
+    handleFirestoreError(error, OperationType.WRITE, `organisers/${firestoreId}`);
   }
 };
 
-export const deleteOrganiserFromDb = async (organiserId: string): Promise<void> => {
+export const deleteOrganiserFromDb = async (
+  organiser: Pick<Organiser, 'id' | 'documentId'>
+): Promise<void> => {
   try {
-    await deleteDoc(doc(db, 'organisers', organiserId));
+    const snapshot = await getDocs(collection(db, 'organisers'));
+    const matchingDocs = snapshot.docs.filter((organiserDoc) => {
+      const data = organiserDoc.data();
+      return (
+        organiserDoc.id === organiser.id ||
+        organiserDoc.id === organiser.documentId ||
+        data.id === organiser.id ||
+        data.id === organiser.documentId
+      );
+    });
+
+    await Promise.all(matchingDocs.map((organiserDoc) => deleteDoc(organiserDoc.ref)));
   } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `organisers/${organiserId}`);
+    handleFirestoreError(error, OperationType.DELETE, `organisers/${organiser.documentId || organiser.id}`);
   }
 };
 
