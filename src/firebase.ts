@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { getAnalytics, isSupported, logEvent } from 'firebase/analytics';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import legacyFirebaseConfig from '../firebase-applet-config.json';
@@ -26,6 +27,26 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+export const analyticsReady = isSupported()
+  .then((supported) => {
+    if (!supported || !firebaseConfig.measurementId || firebaseConfig.measurementId.startsWith('G-MY_')) {
+      console.warn('Firebase Analytics is unavailable. Configure a valid VITE_FIREBASE_MEASUREMENT_ID.');
+      return null;
+    }
+
+    const analytics = getAnalytics(app);
+    logEvent(analytics, 'page_view', {
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: window.location.pathname,
+    });
+    return analytics;
+  })
+  .catch((error: unknown) => {
+    console.error('Firebase Analytics initialization failed:', error);
+    return null;
+  });
 
 export enum OperationType {
   CREATE = 'create',

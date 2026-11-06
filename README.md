@@ -21,3 +21,11 @@ View your app in AI Studio: https://ai.studio/apps/99a7f21a-f35a-4104-9110-79ffe
    `npm run dev`
 
 The app will use Vite environment variables first, and will fall back to the legacy `firebase-applet-config.json` values if needed.
+
+## Website analytics
+
+The site sends a `page_view` event to Firebase Analytics when analytics is enabled and a valid
+`VITE_FIREBASE_MEASUREMENT_ID` (`G-...`) is configured. In Firebase Console, enable Google
+Analytics for the project and create/link a GA4 property. To view total page views and visitors
+by country, open Google Analytics and use the Reports pages for Views and Demographic details.
+Country-level reporting is aggregated by Google Analytics and may take time to appear.

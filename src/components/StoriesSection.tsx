@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StoryArticle, Language } from '../types';
 import { translations } from '../data/initialData';
-import { ArrowUpRight, X, Clock } from 'lucide-react';
+import { ArrowUpRight, X, Clock, Instagram } from 'lucide-react';
 
 interface StoriesSectionProps {
   stories: StoryArticle[];
@@ -193,7 +193,7 @@ export const StoriesSection: React.FC<StoriesSectionProps> = ({
                 </div>
 
                 {/* READ MORE */}
-                <div className="mt-5">
+                <div className="mt-5 flex items-center gap-6">
                   <span className="
                     text-[11px] uppercase tracking-[0.2em]
                     text-[#A5221B]
@@ -202,6 +202,19 @@ export const StoriesSection: React.FC<StoriesSectionProps> = ({
                   ">
                     Read Story
                   </span>
+                  {story.instagramUrl && (
+                    <a
+                      href={story.instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(event) => event.stopPropagation()}
+                      className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.15em] text-[#A5221B] hover:text-[#7F1D1D]"
+                      aria-label={`Open Instagram post related to ${title}`}
+                    >
+                      <Instagram className="w-3.5 h-3.5" />
+                      Instagram
+                    </a>
+                  )}
                 </div>
 
               </article>
@@ -359,9 +372,21 @@ export const StoriesSection: React.FC<StoriesSectionProps> = ({
               {/* BOTTOM DIVIDER */}
               <div className="mt-14 pt-6 border-t border-[#DED7CB] flex items-center justify-between">
 
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[#81756C]">
-                  End of story
-                </span>
+                {activeStory.instagramUrl ? (
+                  <a
+                    href={activeStory.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#A5221B] hover:text-[#7F1D1D]"
+                  >
+                    <Instagram className="w-4 h-4" />
+                    View Instagram post
+                  </a>
+                ) : (
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[#81756C]">
+                    End of story
+                  </span>
+                )}
 
                 <button
                   onClick={() => setActiveStory(null)}

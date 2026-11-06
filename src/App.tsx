@@ -179,7 +179,11 @@ export default function App() {
   const [socialPosts, setSocialPosts] = useState<SocialPost[]>(() => {
     try {
       const saved = localStorage.getItem('agamani_social_posts');
-      return saved ? JSON.parse(saved) : initialSocialPosts;
+      if (!saved) return initialSocialPosts;
+      const savedPosts = JSON.parse(saved) as SocialPost[];
+      const postsById = new Map(initialSocialPosts.map((post) => [post.id, post]));
+      savedPosts.forEach((post) => postsById.set(post.id, post));
+      return [...postsById.values()];
     } catch {
       return initialSocialPosts;
     }
@@ -194,7 +198,17 @@ export default function App() {
   const [stories, setStories] = useState<StoryArticle[]>(() => {
     try {
       const saved = localStorage.getItem('agamani_stories');
-      return saved ? JSON.parse(saved) : initialStories;
+      if (!saved) return initialStories;
+      const savedStories = JSON.parse(saved) as StoryArticle[];
+      const storiesById = new Map(initialStories.map((story) => [story.id, story]));
+      savedStories.forEach((story) => {
+        const defaultStory = initialStories.find((initialStory) => initialStory.id === story.id);
+        storiesById.set(
+          story.id,
+          defaultStory ? { ...defaultStory, ...story, instagramUrl: defaultStory.instagramUrl } : story
+        );
+      });
+      return [...storiesById.values()];
     } catch {
       return initialStories;
     }

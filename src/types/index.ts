@@ -38,6 +38,7 @@ export interface StoryArticle {
   categoryHindi: string;
   readTime: string;
   image: string;
+  instagramUrl?: string;
   contentBengali: string;
   contentEnglish: string;
   contentHindi: string;

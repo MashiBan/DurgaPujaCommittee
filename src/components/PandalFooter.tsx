@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { PandalInfo, Language } from '../types';
 import { translations } from '../data/initialData';
 import { MapPin, Phone, Mail, Eye, Users, X, Send, CheckCircle2, Sparkles, ExternalLink, Github } from 'lucide-react';
@@ -13,8 +13,6 @@ interface PandalFooterProps {
 export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) => {
   const t = translations[language];
 
-  const [visitorCount, setVisitorCount] = useState(0);
-
   // Write to Us Contact Form State
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
   const [contactName, setContactName] = useState('');
@@ -24,23 +22,6 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
   const [contactMessage, setContactMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
-  // Visitor counter (seeded from authentic community milestone)
-  useEffect(() => {
-    const STORAGE_KEY = 'pandal_total_visits';
-    const SESSION_KEY = 'pandal_session_counted';
-
-    let count = Number(localStorage.getItem(STORAGE_KEY)) || 0;
-
-    // Count only once per browser session
-    if (!sessionStorage.getItem(SESSION_KEY)) {
-      count += 1;
-      localStorage.setItem(STORAGE_KEY, count.toString());
-      sessionStorage.setItem(SESSION_KEY, 'true');
-    }
-
-    setVisitorCount(count + 1);
-  }, []);
 
   const [submittedInquiry, setSubmittedInquiry] = useState<{
     subject: string;
@@ -174,7 +155,7 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
 
         </div>
 
-        {/* Visitor Counter */}
+        {/* Analytics */}
         <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-[#292524] grid grid-cols-1 sm:grid-cols-2 items-center gap-4 sm:gap-6">
 
           <div className="flex items-center gap-2.5 sm:gap-3">
@@ -183,12 +164,16 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
             </div>
 
             <div>
-              <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-widest text-[#78716C] font-mono block leading-tight">
-                TOTAL WEBSITE VISITS
-              </span>
-
-              <span className="text-xl sm:text-2xl font-bold text-white tabular-nums leading-tight">
-                {visitorCount.toLocaleString('en-IN')}
+              <a
+                href="https://analytics.google.com/analytics/web/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-widest text-[#F59E0B] hover:text-amber-300 font-mono block leading-tight"
+              >
+                VISITS &amp; VISITOR COUNTRIES · GOOGLE ANALYTICS
+              </a>
+              <span className="text-xs text-[#A8A29E] leading-relaxed">
+                View total page views and visitor countries, including India.
               </span>
             </div>
           </div>
