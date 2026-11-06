@@ -201,20 +201,17 @@ export default function App() {
   });
   const organisersRef = useRef(organisers);
 
-  const handleUpdateOrganisers = (updatedOrganisers: Organiser[]) => {
+  const handleUpdateOrganisers = async (updatedOrganisers: Organiser[]): Promise<void> => {
     const updatedIds = new Set(updatedOrganisers.map((organiser) => organiser.id));
-    organisers
-      .filter((organiser) => !updatedIds.has(organiser.id))
-      .forEach((organiser) => {
-        void deleteOrganiserFromDb(organiser.id).catch((error) =>
-          console.error('Firestore organiser delete failed:', error)
-        );
-      });
-    updatedOrganisers.forEach((organiser) => {
-      void saveOrganiserToDb(organiser).catch((error) =>
-        console.error('Firestore organiser save failed:', error)
-      );
-    });
+    const previousIds = new Set(organisersRef.current.map((organiser) => organiser.id));
+    const removedOrganisers = organisersRef.current.filter((organiser) => !updatedIds.has(organiser.id));
+    const addedOrganisers = updatedOrganisers.filter((organiser) => !previousIds.has(organiser.id));
+
+    await Promise.all([
+      ...removedOrganisers.map((organiser) => deleteOrganiserFromDb(organiser.id)),
+      ...addedOrganisers.map((organiser) => saveOrganiserToDb(organiser)),
+    ]);
+
     organisersRef.current = updatedOrganisers;
     setOrganisers(updatedOrganisers);
     safeSetItem('agamani_organisers', JSON.stringify(updatedOrganisers));

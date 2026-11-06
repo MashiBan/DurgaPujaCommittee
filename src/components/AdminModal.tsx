@@ -91,7 +91,7 @@ interface AdminModalProps {
   onUpdateStories: (stories: StoryArticle[]) => void;
 
   organisers: Organiser[];
-  onUpdateOrganisers: (organisers: Organiser[]) => void;
+  onUpdateOrganisers: (organisers: Organiser[]) => Promise<void>;
 
   pandalInfo: PandalInfo;
   onUpdatePandalInfo: (info: PandalInfo) => void;
@@ -551,10 +551,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     triggerSaveNotification('Photo uploaded with cultural translation');
   };
 
-  const handleRemovePhoto = (photoId: string) => {
-    onUpdateGallery(galleryPhotos.filter((p) => p.id !== photoId));
-    deleteGalleryPhotoFromDb(photoId).catch((err) => console.warn('Firestore photo delete note:', err));
-    triggerSaveNotification('Photo removed');
+  const handleRemovePhoto = async (photoId: string) => {
+    try {
+      await deleteGalleryPhotoFromDb(photoId);
+      onUpdateGallery(galleryPhotos.filter((p) => p.id !== photoId));
+      triggerSaveNotification('Photo deleted from database');
+    } catch (error) {
+      console.error('Firestore photo delete failed:', error);
+      alert('Could not delete this photo from the database. Please try again.');
+    }
   };
 
   // --- Social ---
@@ -661,7 +666,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       bioHindi: hiBio,
       photoUrl: newOrgPhoto,
     };
-    onUpdateOrganisers([...organisers, newOrg]);
+    try {
+      await onUpdateOrganisers([...organisers, newOrg]);
+    } catch (error) {
+      console.error('Firestore organiser save failed:', error);
+      alert('Could not save this organiser to the database. Please try again.');
+      return;
+    }
     setNewOrgName('');
     setNewOrgRole('');
     setNewOrgBio('');
@@ -669,9 +680,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     setOrgPreview(null);
   };
 
-  const handleRemoveOrganiser = (orgId: string) => {
-    onUpdateOrganisers(organisers.filter((o) => o.id !== orgId));
+  const handleRemoveOrganiser = async (orgId: string) => {
+    try {
+    await onUpdateOrganisers(organisers.filter((o) => o.id !== orgId));
     triggerSaveNotification('Organiser removed');
+    } catch (error) {
+    console.error('Firestore organiser delete failed:', error);
+    alert('Could not delete this organiser from the database. Please try again.');
+    }
   };
 
   const initials = (name: string) =>
