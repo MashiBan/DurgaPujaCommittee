@@ -89,10 +89,10 @@ export const savePandalInfoToDb = async (info: PandalInfo): Promise<void> => {
   }
 };
 
-const organiserFromFirestore = (data: Record<string, unknown>): Organiser =>
+const organiserFromFirestore = (documentId: string, data: Record<string, unknown>): Organiser =>
   ({
     ...data,
-    id: data.id as string,
+    id: documentId,
     nameEnglish: (data.nameEnglish || data.name || '') as string,
     roleEnglish: (data.roleEnglish || data.role || '') as string,
     bioEnglish: (data.bioEnglish || data.bio || '') as string,
@@ -105,7 +105,7 @@ export const subscribeOrganisers = (callback: (organisers: Organiser[], fromCach
     { includeMetadataChanges: true },
     (snapshot) => {
       callback(
-        snapshot.docs.map((organiserDoc) => organiserFromFirestore(organiserDoc.data())),
+        snapshot.docs.map((organiserDoc) => organiserFromFirestore(organiserDoc.id, organiserDoc.data())),
         snapshot.metadata.fromCache
       );
     },
