@@ -785,7 +785,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="nonchalantlycool0@gmail.com"
+                      placeholder="Admin"
                       className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-md border border-[#D6CEBE] bg-[#FBF9F5] focus:outline-hidden focus:border-[#800000]"
                       required
                     />
