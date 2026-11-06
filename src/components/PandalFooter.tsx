@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { PandalInfo, Language } from '../types';
 import { translations } from '../data/initialData';
-import { MapPin, Phone, Mail, Eye, Users, X, Send, CheckCircle2, Sparkles, ExternalLink } from 'lucide-react';
+import { MapPin, Phone, Mail, Eye, Users, X, Send, CheckCircle2, Sparkles, ExternalLink, Github } from 'lucide-react';
 import { submitContactInquiry, dispatchEmailViaEmailJs } from '../services/firestoreService';
 
 interface PandalFooterProps {
@@ -210,7 +210,18 @@ export const PandalFooter: React.FC<PandalFooterProps> = ({ info, language }) =>
             <span>{info.nameEnglish}</span>
           </div>
 
-          <div>{t.footerTagline}</div>
+          <div className="flex items-center gap-5">
+            <div>{t.footerTagline}</div>
+            <a
+              href="https://github.com/MashiBan"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit MashiBan on GitHub"
+              className="text-[#A8A29E] hover:text-white transition-colors"
+            >
+              <Github className="w-5 h-5" aria-hidden="true" />
+            </a>
+          </div>
 
         </div>
 
