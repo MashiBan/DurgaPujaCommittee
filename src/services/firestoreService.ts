@@ -154,9 +154,10 @@ export const getEmailJsConfig = async (): Promise<EmailJsConfig | null> => {
     if (snap.exists()) {
       return snap.data() as EmailJsConfig;
     }
-    // const local = localStorage.getItem('agamani_emailjs_config');
-    if (local) {
-      return JSON.parse(local);
+
+    const cachedConfig = localStorage.getItem('agamani_emailjs_config');
+    if (cachedConfig) {
+      return JSON.parse(cachedConfig) as EmailJsConfig;
     }
     return null;
   } catch (err) {
