@@ -1,0 +1,6 @@
+{
+  "name": "Agamani - Shree Shree Durga Puja",
+  "description": "Living Bengali cultural editorial website for Shree Shree Durga Puja featuring time-based interactive pandal illustration, schedule, articles, gallery, and admin portal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

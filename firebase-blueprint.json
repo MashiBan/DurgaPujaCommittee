@@ -1,0 +1,130 @@
+{
+  "entities": {
+    "GalleryPhoto": {
+      "title": "GalleryPhoto",
+      "description": "A festival photograph",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "caption": { "type": "string", "maxLength": 1000 },
+        "category": { "type": "string", "enum": ["culture", "rituals", "pandal", "art"] },
+        "imageUrl": { "type": "string", "maxLength": 500000 },
+        "year": { "type": "string", "maxLength": 10 }
+      },
+      "required": ["id", "title", "caption", "category", "imageUrl", "year"]
+    },
+    "ScheduleDay": {
+      "title": "ScheduleDay",
+      "description": "Daily puja schedule day",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 100 },
+        "bengaliTithi": { "type": "string", "maxLength": 100 },
+        "englishName": { "type": "string", "maxLength": 100 },
+        "significance": { "type": "string", "maxLength": 1000 }
+      },
+      "required": ["id", "date", "bengaliTithi", "englishName", "significance"]
+    },
+    "StoryArticle": {
+      "title": "StoryArticle",
+      "description": "Puja cultural stories and lore",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "banglaTitle": { "type": "string", "maxLength": 200 },
+        "excerpt": { "type": "string", "maxLength": 1000 },
+        "content": { "type": "string", "maxLength": 10000 },
+        "tag": { "type": "string", "maxLength": 50 },
+        "readTime": { "type": "string", "maxLength": 50 },
+        "heroImage": { "type": "string", "maxLength": 2000 }
+      },
+      "required": ["id", "title", "banglaTitle", "excerpt", "content", "tag", "readTime", "heroImage"]
+    },
+    "Organiser": {
+      "title": "Organiser",
+      "description": "Committee organiser or artisan",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 200 },
+        "role": { "type": "string", "maxLength": 200 },
+        "bio": { "type": "string", "maxLength": 2000 },
+        "photo": { "type": "string", "maxLength": 500000 }
+      },
+      "required": ["id", "name", "role", "bio", "photo"]
+    },
+    "PandalInfo": {
+      "title": "PandalInfo",
+      "description": "Puja pandal location and contacts",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 200 },
+        "location": { "type": "string", "maxLength": 500 },
+        "landmark": { "type": "string", "maxLength": 300 },
+        "zone": { "type": "string", "maxLength": 100 },
+        "establishedYear": { "type": "string", "maxLength": 10 },
+        "timings": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["name", "location", "landmark", "zone", "establishedYear", "timings"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Contact form submissions from visitors",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 200 },
+        "email": { "type": "string", "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "subject": { "type": "string", "maxLength": 200 },
+        "message": { "type": "string", "maxLength": 5000 },
+        "createdAt": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["id", "name", "email", "message", "createdAt"]
+    },
+    "SystemAuth": {
+      "title": "SystemAuth",
+      "description": "Admin authentication credentials in backend",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 200 },
+        "passwordHash": { "type": "string", "maxLength": 256 },
+        "updatedAt": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["email", "passwordHash", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/gallery/{photoId}": {
+      "schema": "GalleryPhoto",
+      "description": "Festival photo collection"
+    },
+    "/schedule/{dayId}": {
+      "schema": "ScheduleDay",
+      "description": "Festival schedule by day"
+    },
+    "/stories/{storyId}": {
+      "schema": "StoryArticle",
+      "description": "Cultural stories and articles"
+    },
+    "/organisers/{organiserId}": {
+      "schema": "Organiser",
+      "description": "Committee members and artisans"
+    },
+    "/pandal_info/{infoId}": {
+      "schema": "PandalInfo",
+      "description": "Pandal metadata and address"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Contact form submissions"
+    },
+    "/system_auth/{docId}": {
+      "schema": "SystemAuth",
+      "description": "Admin auth credentials"
+    }
+  }
+}

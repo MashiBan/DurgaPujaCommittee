@@ -1,0 +1,329 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Galada&display=swap');
+
+@layer base {
+  :root {
+    --bg-paper: #FBF9F5;
+    --bg-card: #FFFFFF;
+    --vermilion: #B91C1C;
+    --terracotta: #C2410C;
+    --golden-yellow: #EAB308;
+    --charcoal: #1C1917;
+  }
+}
+
+.font-bengali-serif {
+  font-family: 'Noto Serif Bengali', serif;
+}
+
+.font-bengali-sans {
+  font-family: 'Hind Siliguri', sans-serif;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-galada {
+  font-family: 'Galada', cursive;
+}
+
+/* Custom scrollbar for horizontal gallery & editorial panes */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* Smooth continuous marquee animation */
+@keyframes marquee-left-to-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee-ltr {
+  display: flex;
+  width: max-content;
+  animation: marquee-left-to-right 60s linear infinite;
+}
+
+/* Subtle cloud drift */
+@keyframes cloud-drift {
+  0% {
+    transform: translateX(-10%);
+  }
+  50% {
+    transform: translateX(5%);
+  }
+  100% {
+    transform: translateX(-10%);
+  }
+}
+
+.animate-cloud-drift {
+  animation: cloud-drift 24s ease-in-out infinite;
+}
+
+/* Subtle grass / kashphul sway */
+@keyframes kash-sway {
+  0%, 100% {
+    transform: rotate(0deg) skewX(0deg);
+  }
+  50% {
+    transform: rotate(2.5deg) skewX(1.5deg);
+  }
+}
+
+.animate-kash-sway {
+  transform-origin: bottom center;
+  animation: kash-sway 2s ease-in-out infinite;
+}
+
+/* Subtle lamp flicker */
+@keyframes diya-glow {
+  0%, 100% {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.7));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.9));
+  }
+}
+
+.animate-diya-glow {
+  animation: diya-glow 2.5s ease-in-out infinite;
+}
+
+
+/* @keyframes cloudDrift {
+  0% {
+    transform: translateX(-3%);
+  }
+  50% {
+    transform: translateX(3%);
+  }
+  100% {
+    transform: translateX(-3%);
+  }
+} */
+
+/* @keyframes kashSway {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+} */
+
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.6);
+  }
+}
+
+.star-twinkle {
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-twinkle {
+    animation: none;
+    opacity: 0.8;
+  }
+}
+
+
+
+/* Gentle sun breathing */
+@keyframes sunPulse {
+  0%, 100% {
+    opacity: 0.65;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.animate-sun-pulse {
+  animation: sunPulse 6s ease-in-out infinite;
+}
+
+/* Subtle rotating sunlight ring */
+@keyframes sunRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-sun-rotate {
+  animation: sunRotate 2s linear infinite;
+}
+
+/* Natural crowd movement */
+@keyframes devoteeWalk {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-4px) translateX(2px);
+  }
+  50% {
+    transform: translateY(0) translateX(4px);
+  }
+  75% {
+    transform: translateY(-3px) translateX(1px);
+  }
+}
+
+.devotee-walk {
+  animation: devoteeWalk 3.5s ease-in-out infinite;
+}
+
+@keyframes devoteeCrowdMove {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-1.5px, -1px) rotate(-1deg);
+  }
+  60% {
+    transform: translate(1.5px, 0) rotate(0.8deg);
+  }
+}
+
+@keyframes devoteeDancerMove {
+  0%, 100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(3deg);
+  }
+}
+
+@keyframes devoteeDrummerMove {
+  0%, 100% {
+    transform: rotate(-1deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+.devotee-figure {
+  position: absolute;
+  bottom: -0.5rem;
+  width: clamp(30px, 4vw, 54px);
+  overflow: visible;
+  transform-origin: 50% 100%;
+  animation: devoteeCrowdMove 4s ease-in-out infinite;
+  transition: opacity 1s ease;
+}
+
+.devotee-figure-back {
+  z-index: 15;
+  filter: saturate(0.75) brightness(0.82);
+}
+
+.devotee-figure-front {
+  z-index: 25;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.18));
+}
+
+.devotee-figure.devotee-dancer {
+  animation: devoteeDancerMove 2.4s ease-in-out infinite;
+}
+
+.devotee-figure.devotee-drummer {
+  animation: devoteeDrummerMove 0.9s ease-in-out infinite;
+}
+
+.aarti-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: diya-glow 1.4s ease-in-out infinite;
+}
+
+@media (max-width: 640px) {
+  .devotee-figure[data-mobile-hidden='true'] {
+    display: none;
+  }
+}
+
+#devotee-crowd[data-time-phase='dawn'] .devotee-figure {
+  animation-duration: 4.8s;
+}
+
+#devotee-crowd[data-time-phase='noon'] .devotee-figure {
+  animation-duration: 3.8s;
+}
+
+#devotee-crowd[data-time-phase='sunset'] .devotee-figure {
+  animation-duration: 3.2s;
+}
+
+#devotee-crowd[data-time-phase='night'] .devotee-figure {
+  animation-duration: 3.6s;
+}
+
+#devotee-crowd[data-time-phase='lateNight'] .devotee-figure {
+  animation-duration: 6s;
+}
+
+#devotee-crowd[data-time-phase='lateNight'] .devotee-figure.devotee-dancer {
+  animation-duration: 4.5s;
+}
+
+/* .devotee-reverse {
+  animation-direction: reverse;
+  animation-duration: 4.2s;
+} */
+
+/* Gentle swaying */
+@keyframes devoteeSway {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(1deg);
+  }
+}
+
+.devotee-sway {
+  transform-origin: bottom center;
+  animation: devoteeSway 3s ease-in-out infinite;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-sun-pulse,
+  .animate-sun-rotate,
+  .devotee-walk,
+  .devotee-sway,
+  .devotee-figure,
+  .aarti-flame {
+    animation: none !important;
+  }
+}

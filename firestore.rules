@@ -1,0 +1,153 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Helper Primitives
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email == 'nonchalantlycool0@gmail.com' && request.auth.token.email_verified == true) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation helper for GalleryPhoto
+    function isValidGallery(data) {
+      return data.keys().hasAll(['id', 'title', 'caption', 'category', 'imageUrl', 'year']) &&
+        data.keys().hasOnly(['id', 'title', 'caption', 'category', 'imageUrl', 'year', 'createdAt']) &&
+        data.id is string && isValidId(data.id) &&
+        data.title is string && data.title.size() <= 200 &&
+        data.caption is string && data.caption.size() <= 1000 &&
+        data.category in ['culture', 'rituals', 'pandal', 'art'] &&
+        data.imageUrl is string && data.imageUrl.size() <= 500000 &&
+        data.year is string && data.year.size() <= 10;
+    }
+
+    // Validation helper for ScheduleDay
+    function isValidSchedule(data) {
+      return data.keys().hasAll(['id', 'date', 'bengaliTithi', 'englishName', 'significance']) &&
+        data.id is string && isValidId(data.id) &&
+        data.date is string && data.date.size() <= 100 &&
+        data.bengaliTithi is string && data.bengaliTithi.size() <= 100 &&
+        data.englishName is string && data.englishName.size() <= 100 &&
+        data.significance is string && data.significance.size() <= 1000;
+    }
+
+    // Validation helper for StoryArticle
+    function isValidStory(data) {
+      return data.keys().hasAll(['id', 'title', 'banglaTitle', 'excerpt', 'content', 'tag', 'readTime', 'heroImage']) &&
+        data.id is string && isValidId(data.id) &&
+        data.title is string && data.title.size() <= 200 &&
+        data.banglaTitle is string && data.banglaTitle.size() <= 200 &&
+        data.excerpt is string && data.excerpt.size() <= 1000 &&
+        data.content is string && data.content.size() <= 10000 &&
+        data.tag is string && data.tag.size() <= 50 &&
+        data.readTime is string && data.readTime.size() <= 50 &&
+        data.heroImage is string && data.heroImage.size() <= 2000;
+    }
+
+    // Validation helper for Organiser
+    function isValidOrganiser(data) {
+      return data.keys().hasAll(['id', 'name', 'role', 'bio', 'photo']) &&
+        data.id is string && isValidId(data.id) &&
+        data.name is string && data.name.size() <= 200 &&
+        data.role is string && data.role.size() <= 200 &&
+        data.bio is string && data.bio.size() <= 2000 &&
+        data.photo is string && data.photo.size() <= 500000;
+    }
+
+    // Validation helper for PandalInfo
+    function isValidPandalInfo(data) {
+      return data.keys().hasAll(['name', 'location', 'landmark', 'zone', 'establishedYear', 'timings']) &&
+        data.name is string && data.name.size() <= 200 &&
+        data.location is string && data.location.size() <= 500 &&
+        data.landmark is string && data.landmark.size() <= 300 &&
+        data.zone is string && data.zone.size() <= 100 &&
+        data.establishedYear is string && data.establishedYear.size() <= 10 &&
+        data.timings is string && data.timings.size() <= 200;
+    }
+
+    // Validation helper for Inquiry
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['id', 'name', 'email', 'message', 'createdAt']) &&
+        data.id is string && isValidId(data.id) &&
+        data.name is string && data.name.size() <= 200 &&
+        data.email is string && data.email.size() <= 200 &&
+        data.message is string && data.message.size() <= 5000 &&
+        data.createdAt is string && data.createdAt.size() <= 100;
+    }
+
+    // Match Collections
+    match /gallery/{photoId} {
+      allow read: if true;
+      allow create: if isValidId(photoId) && isValidGallery(incoming());
+      allow update: if isValidId(photoId) && isValidGallery(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(photoId);
+    }
+
+    match /schedule/{dayId} {
+      allow read: if true;
+      allow create: if isValidId(dayId) && isValidSchedule(incoming());
+      allow update: if isValidId(dayId) && isValidSchedule(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(dayId);
+    }
+
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if isValidId(storyId) && isValidStory(incoming());
+      allow update: if isValidId(storyId) && isValidStory(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(storyId);
+    }
+
+    match /organisers/{organiserId} {
+      allow read: if true;
+      allow create: if isValidId(organiserId) && isValidOrganiser(incoming());
+      allow update: if isValidId(organiserId) && isValidOrganiser(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(organiserId);
+    }
+
+    match /pandal_info/{infoId} {
+      allow read: if true;
+      allow create, update, delete: if isValidId(infoId) && isValidPandalInfo(incoming());
+    }
+
+    // Contact Inquiries (Write to Us)
+    match /inquiries/{inquiryId} {
+      allow read, list, delete: if true;
+      allow create: if isValidId(inquiryId) && isValidInquiry(incoming());
+    }
+
+    // Backend Admin Auth credentials & site settings
+    match /system_auth/{docId} {
+      allow read, write: if isValidId(docId);
+    }
+
+    match /settings/{settingId} {
+      allow read, write: if isValidId(settingId);
+    }
+
+    match /admins/{adminId} {
+      allow read, write: if true;
+    }
+  }
+}
