@@ -180,7 +180,15 @@ export default function App() {
   const [organisers, setOrganisers] = useState<Organiser[]>(() => {
     try {
       const saved = localStorage.getItem('agamani_organisers');
-      return saved ? JSON.parse(saved) : initialOrganisers;
+      if (!saved) return initialOrganisers;
+
+      const savedOrganisers = JSON.parse(saved) as Organiser[];
+      return savedOrganisers.map((organiser) => {
+        const defaults = initialOrganisers.find((initialOrganiser) => initialOrganiser.id === organiser.id);
+        return defaults
+          ? { ...defaults, ...organiser, contact: organiser.contact || defaults.contact }
+          : organiser;
+      });
     } catch {
       return initialOrganisers;
     }

@@ -1,12 +1,31 @@
 import React from 'react';
 import { Organiser, Language } from '../types';
 import { translations } from '../data/initialData';
-import { Mail, Sparkles } from 'lucide-react';
+import { Flower2, Mail, Phone } from 'lucide-react';
 
 interface OrganisersSectionProps {
   organisers: Organiser[];
   language: Language;
 }
+
+const OrganiserAvatar: React.FC<{ organiser: Organiser }> = ({ organiser }) => {
+  const [hasImageError, setHasImageError] = React.useState(false);
+
+  return (
+    <div className="w-8 h-8 rounded-full bg-[#B91C1C]/10 flex items-center justify-center mb-4 border border-[#B91C1C]/20 text-[#B91C1C] overflow-hidden">
+      {organiser.photoUrl && !hasImageError ? (
+        <img
+          src={organiser.photoUrl}
+          alt={`${organiser.nameEnglish} portrait`}
+          className="w-full h-full object-cover"
+          onError={() => setHasImageError(true)}
+        />
+      ) : (
+        <Flower2 className="w-4 h-4" aria-hidden="true" />
+      )}
+    </div>
+  );
+};
 
 export const OrganisersSection: React.FC<OrganisersSectionProps> = ({ organisers, language }) => {
   const t = translations[language];
@@ -57,15 +76,7 @@ export const OrganisersSection: React.FC<OrganisersSectionProps> = ({ organisers
                 className="bg-white p-6 rounded-xl border border-[#E7E2D6] shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group"
               >
                 <div>
-                  {/* Subtle traditional lotus emblem */}
-                  <div className="w-8 h-8 rounded-full bg-[#B91C1C]/10 flex items-center justify-center p-1.5 mb-4 border border-[#B91C1C]/20 text-[#B91C1C]">
-                    <img
-                      src="/public/assets/aistudio/71c76a0abfdd9d11fad2e5ea11a67836_706aab9d.jpg"
-                      alt="Lotus Motif"
-                      className="w-full h-full object-contain"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
+                  <OrganiserAvatar organiser={org} />
 
                   {/* Role Kicker */}
                   <span className="text-[11px] uppercase tracking-wider font-mono text-[#991B1B] font-semibold block mb-1.5">
@@ -84,12 +95,18 @@ export const OrganisersSection: React.FC<OrganisersSectionProps> = ({ organisers
                 </div>
 
                 {/* Contact Email */}
-                {org.contact && (
-                  <div className="mt-5 pt-3.5 border-t border-[#F2EEE4] flex items-center gap-1.5 text-[11px] text-[#78716C] font-mono">
-                    <Mail className="w-3.5 h-3.5 text-[#991B1B] shrink-0" />
-                    <span className="truncate">{org.contact}</span>
-                  </div>
-                )}
+                <div className="mt-5 pt-3.5 border-t border-[#F2EEE4] flex items-center gap-1.5 text-[11px] text-[#78716C] font-mono min-h-9">
+                  {org.contact && (
+                    <>
+                      {org.contact.includes('@') ? (
+                        <Mail className="w-3.5 h-3.5 text-[#991B1B] shrink-0" />
+                      ) : (
+                        <Phone className="w-3.5 h-3.5 text-[#991B1B] shrink-0" />
+                      )}
+                      <span className="truncate">{org.contact}</span>
+                    </>
+                  )}
+                </div>
               </div>
             );
           })}
