@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Language,
   FestivalId,
@@ -18,7 +18,13 @@ import {
   initialPandalInfo,
 } from './data/initialData';
 import { allFestivals } from './data/festivalData';
-import { subscribeGallery, subscribePandalInfo } from './services/firestoreService';
+import {
+  deleteOrganiserFromDb,
+  saveOrganiserToDb,
+  subscribeGallery,
+  subscribeOrganisers,
+  subscribePandalInfo,
+} from './services/firestoreService';
 import { Navbar } from './components/Navbar';
 import { LivingPandalHero } from './components/LivingPandalHero';
 import { EditorialIntro } from './components/EditorialIntro';
@@ -193,8 +199,23 @@ export default function App() {
       return initialOrganisers;
     }
   });
+  const organisersRef = useRef(organisers);
 
   const handleUpdateOrganisers = (updatedOrganisers: Organiser[]) => {
+    const updatedIds = new Set(updatedOrganisers.map((organiser) => organiser.id));
+    organisers
+      .filter((organiser) => !updatedIds.has(organiser.id))
+      .forEach((organiser) => {
+        void deleteOrganiserFromDb(organiser.id).catch((error) =>
+          console.error('Firestore organiser delete failed:', error)
+        );
+      });
+    updatedOrganisers.forEach((organiser) => {
+      void saveOrganiserToDb(organiser).catch((error) =>
+        console.error('Firestore organiser save failed:', error)
+      );
+    });
+    organisersRef.current = updatedOrganisers;
     setOrganisers(updatedOrganisers);
     safeSetItem('agamani_organisers', JSON.stringify(updatedOrganisers));
   };
@@ -227,6 +248,7 @@ export default function App() {
     setGalleryPhotos(initialGalleryPhotos);
     setSocialPosts(initialSocialPosts);
     setStories(initialStories);
+    organisersRef.current = initialOrganisers;
     setOrganisers(initialOrganisers);
     setPandalInfo(initialPandalInfo);
   };
@@ -245,9 +267,38 @@ export default function App() {
       }
     });
 
+    const unsubOrganisers = subscribeOrganisers((remoteOrganisers, fromCache) => {
+      if (fromCache && remoteOrganisers.length === 0) return;
+
+      const localOrganisers = organisersRef.current;
+      const remoteById = new Map(remoteOrganisers.map((organiser) => [organiser.id, organiser]));
+      const mergedOrganisers = remoteOrganisers.map((remoteOrganiser) => {
+        const localOrganiser = localOrganisers.find((organiser) => organiser.id === remoteOrganiser.id);
+        if (!localOrganiser || remoteOrganiser.photoUrl || !localOrganiser.photoUrl) return remoteOrganiser;
+        const mergedOrganiser = { ...localOrganiser, ...remoteOrganiser, photoUrl: localOrganiser.photoUrl };
+        void saveOrganiserToDb(mergedOrganiser).catch((error) =>
+          console.error('Firestore organiser photo migration failed:', error)
+        );
+        return mergedOrganiser;
+      });
+
+      const localOnlyOrganisers = localOrganisers.filter((organiser) => !remoteById.has(organiser.id));
+      localOnlyOrganisers.forEach((organiser) => {
+        void saveOrganiserToDb(organiser).catch((error) =>
+          console.error('Firestore organiser migration failed:', error)
+        );
+      });
+
+      const merged = [...mergedOrganisers, ...localOnlyOrganisers];
+      organisersRef.current = merged;
+      setOrganisers(merged);
+      safeSetItem('agamani_organisers', JSON.stringify(merged));
+    });
+
     return () => {
       unsubGallery();
       unsubPandal();
+      unsubOrganisers();
     };
   }, []);
 

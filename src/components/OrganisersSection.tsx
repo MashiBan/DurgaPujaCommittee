@@ -1,7 +1,7 @@
 import React from 'react';
 import { Organiser, Language } from '../types';
 import { translations } from '../data/initialData';
-import { Flower2, Mail, Phone } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 
 interface OrganisersSectionProps {
   organisers: Organiser[];
@@ -11,18 +11,16 @@ interface OrganisersSectionProps {
 const OrganiserAvatar: React.FC<{ organiser: Organiser }> = ({ organiser }) => {
   const [hasImageError, setHasImageError] = React.useState(false);
 
+  if (!organiser.photoUrl || hasImageError) return null;
+
   return (
-    <div className="w-8 h-8 rounded-full bg-[#B91C1C]/10 flex items-center justify-center mb-4 border border-[#B91C1C]/20 text-[#B91C1C] overflow-hidden">
-      {organiser.photoUrl && !hasImageError ? (
-        <img
-          src={organiser.photoUrl}
-          alt={`${organiser.nameEnglish} portrait`}
-          className="w-full h-full object-cover"
-          onError={() => setHasImageError(true)}
-        />
-      ) : (
-        <Flower2 className="w-4 h-4" aria-hidden="true" />
-      )}
+    <div className="w-16 h-16 rounded-full mb-4 border border-[#B91C1C]/20 overflow-hidden">
+      <img
+        src={organiser.photoUrl}
+        alt={`${organiser.nameEnglish} portrait`}
+        className="w-full h-full object-cover"
+        onError={() => setHasImageError(true)}
+      />
     </div>
   );
 };

@@ -7,7 +7,7 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
-import { GalleryPhoto, PandalInfo } from '../types';
+import { GalleryPhoto, Organiser, PandalInfo } from '../types';
 import emailjs from '@emailjs/browser';
 
 export const subscribeGallery = (
@@ -86,6 +86,55 @@ export const savePandalInfoToDb = async (info: PandalInfo): Promise<void> => {
     await setDoc(doc(db, 'pandal_info', 'default'), info);
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, docPath);
+  }
+};
+
+const organiserFromFirestore = (data: Record<string, unknown>): Organiser =>
+  ({
+    ...data,
+    id: data.id as string,
+    nameEnglish: (data.nameEnglish || data.name || '') as string,
+    roleEnglish: (data.roleEnglish || data.role || '') as string,
+    bioEnglish: (data.bioEnglish || data.bio || '') as string,
+    photoUrl: (data.photoUrl || data.photo || '') as string,
+  }) as Organiser;
+
+export const subscribeOrganisers = (callback: (organisers: Organiser[], fromCache: boolean) => void) =>
+  onSnapshot(
+    collection(db, 'organisers'),
+    { includeMetadataChanges: true },
+    (snapshot) => {
+      callback(
+        snapshot.docs.map((organiserDoc) => organiserFromFirestore(organiserDoc.data())),
+        snapshot.metadata.fromCache
+      );
+    },
+    (error) => {
+      console.error('Firestore organisers snapshot error:', error);
+    }
+  );
+
+export const saveOrganiserToDb = async (organiser: Organiser): Promise<void> => {
+  const { photoUrl, ...organiserFields } = organiser;
+  const firestoreOrganiser = {
+    ...organiserFields,
+    name: organiser.nameEnglish,
+    role: organiser.roleEnglish,
+    bio: organiser.bioEnglish,
+    photo: photoUrl,
+  };
+  try {
+    await setDoc(doc(db, 'organisers', organiser.id), firestoreOrganiser);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `organisers/${organiser.id}`);
+  }
+};
+
+export const deleteOrganiserFromDb = async (organiserId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'organisers', organiserId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `organisers/${organiserId}`);
   }
 };
 
