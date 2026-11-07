@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StoryArticle, Language } from '../types';
-import { translations } from '../data/initialData';
+import { alponaImage, dhaakImage, translations } from '../data/initialData';
 import { ArrowUpRight, X, Clock, Instagram } from 'lucide-react';
 
 interface StoriesSectionProps {
@@ -45,6 +45,9 @@ export const StoriesSection: React.FC<StoriesSectionProps> = ({
       : language === 'hi'
       ? story.contentHindi
       : story.contentEnglish;
+
+  const getStoryImage = (story: StoryArticle) =>
+    story.id === 'story-1' ? dhaakImage : story.id === 'story-2' ? alponaImage : story.image;
 
   return (
     <section
@@ -112,7 +115,7 @@ export const StoriesSection: React.FC<StoriesSectionProps> = ({
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#EFE9DD] mb-6">
 
                   <img
-                    src={story.image}
+                    src={getStoryImage(story)}
                     alt={title}
                     loading="lazy"
                     referrerPolicy="no-referrer"
@@ -326,7 +329,7 @@ export const StoriesSection: React.FC<StoriesSectionProps> = ({
               {/* FEATURE IMAGE */}
               <div className="aspect-[16/9] w-full overflow-hidden bg-[#EFE9DD] mb-10">
                 <img
-                  src={activeStory.image}
+                  src={getStoryImage(activeStory)}
                   alt={getTitle(activeStory)}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"

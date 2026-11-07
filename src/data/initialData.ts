@@ -255,6 +255,9 @@ export const initialScheduleDays: ScheduleDay[] = [
   },
 ];
 
+export const dhaakImage = '/assets/social/durga-dhaak.jpg';
+export const alponaImage = '/assets/social/alpona.jpg';
+
 export const initialStories: StoryArticle[] = [
   {
     id: 'story-1',
@@ -268,7 +271,7 @@ export const initialStories: StoryArticle[] = [
     categoryEnglish: 'MUSIC & RITUAL',
     categoryHindi: 'संगीत और परंपरा',
     readTime: '4 min read',
-    image: '/assets/social/durga-dhaak.jpg',
+    image: dhaakImage,
     instagramUrl: 'https://www.instagram.com/p/DeNwf1dBURt/',
     pullQuote: '"When the curved stick strikes the stretched leather, it is not just music; it is the heartbeat of Bengal welcoming her daughter back home."',
     contentBengali: 'শরতের শিউলিঝরা ভোরে যখন কুয়াশার চাদর সরে যায়, দূর নদীঘাট থেকে ভেসে আসে গুরুগম্ভীর কাঠি পড়ার শব্দ। ঢাকের এই প্রথম বোল জানান দেয়—মা এসে গেছেন। বংশপরম্পরায় বীরভূম, বর্ধমান ও বাঁকুড়ার ঢাকিরা ঢাক কাঁধে কোলকাতায় আসেন, তাদের তালই পুজোর প্রতিটি দিনকে প্রাণবন্ত করে রাখে।',
@@ -287,7 +290,7 @@ export const initialStories: StoryArticle[] = [
     categoryEnglish: 'CRAFT & HERITAGE',
     categoryHindi: 'पारंपरिक लोककला',
     readTime: '5 min read',
-    image: '/assets/social/alpona.jpg',
+    image: alponaImage,
     instagramUrl: 'https://www.instagram.com/p/DepNlZYgVNx/?img_index=1',
     pullQuote: '"With soaking rice ground to milk and a tiny bit of cotton cloth between fingers, mother sits down before dawn to draw the lotus path for Uma."',
     contentBengali: 'আলপনা শুধু অলঙ্করণ নয়, এটি অন্তরের প্রার্থনা। আতপ চাল সারা রাত ভিজিয়ে রেখে ভোরে শীলনোড়ায় বেটে তৈরি হয় পিটুলি। বৃদ্ধা দিদিমা থেকে তরুণী কন্যা—ছোট একখণ্ড কাপড়ে পিটুলি ভিজিয়ে নিপুণ আঙুলের ছোঁয়ায় মেঝের বুকে ফুটিয়ে তোলেন পদ্ম, কদম, ধানের শিষ ও লক্ষ্মীর পদচিহ্ন।',
@@ -340,7 +343,7 @@ export const initialGalleryPhotos: GalleryPhoto[] = [
     title: 'ঢাকের বোল (Dhaak Drums)',
     caption: 'Traditional dhaakis bring the rhythm of Durga Puja to life.',
     category: 'culture',
-    imageUrl: '/assets/social/durga-dhaak.jpg',
+    imageUrl: dhaakImage,
     year: '2026',
   },
   {
@@ -348,7 +351,7 @@ export const initialGalleryPhotos: GalleryPhoto[] = [
     title: 'আলপনা (Alpona Art)',
     caption: 'Traditional Bengali alpona designs welcome the goddess.',
     category: 'art',
-    imageUrl: '/assets/social/alpona.jpg',
+    imageUrl: alponaImage,
     year: '2026',
   },
   {
