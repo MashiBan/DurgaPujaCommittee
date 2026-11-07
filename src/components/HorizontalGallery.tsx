@@ -111,7 +111,7 @@ export const HorizontalGallery: React.FC<HorizontalGalleryProps> = ({
             >
               <img
                 src={photo.imageUrl}
-                alt="Durga Puja Chronicle"
+                alt={photo.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-106"
                 referrerPolicy="no-referrer"
               />

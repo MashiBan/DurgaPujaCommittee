@@ -336,6 +336,22 @@ export const initialStories: StoryArticle[] = [
 
 export const initialGalleryPhotos: GalleryPhoto[] = [
   {
+    id: 'provided-gal-dhaak',
+    title: 'ঢাকের বোল (Dhaak Drums)',
+    caption: 'Traditional dhaakis bring the rhythm of Durga Puja to life.',
+    category: 'culture',
+    imageUrl: '/assets/social/durga-dhaak.jpg',
+    year: '2026',
+  },
+  {
+    id: 'provided-gal-alpona',
+    title: 'আলপনা (Alpona Art)',
+    caption: 'Traditional Bengali alpona designs welcome the goddess.',
+    category: 'art',
+    imageUrl: '/assets/social/alpona.jpg',
+    year: '2026',
+  },
+  {
     id: 'provided-gal-1',
     title: 'মায়ের প্রতিমা (Durga Idol)',
     caption: 'A close view of Maa Durga in the beautifully decorated pandal.',
