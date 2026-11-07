@@ -46,8 +46,12 @@ export const StoriesSection: React.FC<StoriesSectionProps> = ({
       ? story.contentHindi
       : story.contentEnglish;
 
-  const getStoryImage = (story: StoryArticle) =>
-    story.id === 'story-1' ? dhaakImage : story.id === 'story-2' ? alponaImage : story.image;
+  const getStoryImage = (story: StoryArticle) => {
+    const storyIndex = stories.findIndex(({ id }) => id === story.id);
+    if (storyIndex === 0) return dhaakImage;
+    if (storyIndex === 1) return alponaImage;
+    return story.image;
+  };
 
   return (
     <section
